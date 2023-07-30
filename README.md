@@ -2,13 +2,13 @@
 ### Reproduction of 1d Gaussian, uniform, and discrete distributions based on Wasserstein GAN  
 The codes are mostly based on Jan Kremer's Github repository (https://github.com/kremerj/gan/tree/master). We additionally added Uniform and discrete distributions here.
 
-![Teaser image](./Gaussian_pdf.gif) 
+![Teaser image](./Gaussian_pdf.gif)   
 **Picture:** *Geneated Gaussian pdf during training*
 
-![Teaser image](./Uniform_pdf.gif) 
+![Teaser image](./Uniform_pdf.gif)    
 **Picture:** *Geneated uniform pdf during training*
 
-![Teaser image](./Discrete_pdf_change.gif) 
+![Teaser image](./Discrete_pdf_change.gif)    
 **Picture:** *Geneated discrete pdf during training*
 
 #### The architecture of the generator and the discriminator we use here is simply a fully-connected neural network.  
