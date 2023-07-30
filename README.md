@@ -3,7 +3,7 @@ Reproduction test of 1d Gaussian, uniform, and discrete distributions based on W
 
 The codes are mostly based on Jan Kremer's Github repository (https://github.com/kremerj/gan/tree/master). 
 
-The architecture of the generator and the discriminator we use here is simply a fully-connected neural network. 
+The architecture of the generator and the discriminator we use here is simply a fully-connected neural network.  
 The layer number and neuron number can be set in gan.py file: 
 
 ```
