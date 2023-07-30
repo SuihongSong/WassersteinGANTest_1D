@@ -5,11 +5,14 @@ The codes are mostly based on Jan Kremer's Github repository (https://github.com
 ![Teaser image](./Gaussian_pdf.gif)   
 **Geneated Gaussian pdf during training**
 
+
 ![Teaser image](./Uniform_pdf.gif)    
 **Geneated uniform pdf during training**
 
+
 ![Teaser image](./Discrete_pdf_change.gif)    
 **Geneated discrete pdf during training**
+
 
 #### The architecture of the generator and the discriminator we use here is simply a fully-connected neural network.  
 The layer number and neuron number can be set in gan.py file: 
