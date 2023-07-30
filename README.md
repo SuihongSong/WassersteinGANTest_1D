@@ -48,6 +48,6 @@ Gaussian -G-> discrete distribution.
 #### To run or revise the codes,   
 download gan.py and TrainGAN.ipynb,   
 open TrainGAN.ipynb with jupyter notebook,   
-revise the path of the two code files after "%cd" in the first cell,   
+revise the path of gan.py file after "%cd" in the first cell,   
 revise the distribution type and other parameters in the last cell,   
 and run all cells.
