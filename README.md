@@ -5,6 +5,8 @@ The codes are mostly based on Jan Kremer's Github repository (https://github.com
 
 The architecture of the generator and the discriminator we use here is simply a fully-connected neural network. 
 The layer number and neuron number can be set in gan.py file: 
+
+```
 class GAN(object):
     def __init__(..., n_hidden=12, ...)
     def _create_generator(self, activation='softplus'):
@@ -19,7 +21,8 @@ class GAN(object):
         k = layers.Dense(self.n_hidden, activation=activation)
         output = layers.Dense(1)
         return lambda x: output(k(g(h(x))))
-    
+```
+   
 The fully connected neural network architecture for the generator and the discriminator used here is: 
 input (1 neuron) -> hidden layer 1 (12 neurons) -> hidden layer 2 (12 neurons) -> hidden layer 3 (12 neurons) -> input (1 neuron)
 
