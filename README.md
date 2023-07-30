@@ -1,5 +1,5 @@
 # WassersteinGANTest_1D
-## Reproduction test of 1d Gaussian, uniform, and discrete distributions based on Wasserstein GAN
+## Reproduction of 1d Gaussian, uniform, and discrete distributions based on Wasserstein GAN
 
 The codes are mostly based on Jan Kremer's Github repository (https://github.com/kremerj/gan/tree/master). 
 
