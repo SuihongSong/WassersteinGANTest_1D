@@ -22,12 +22,16 @@ class GAN(object):
         output = layers.Dense(1)
         return lambda x: output(k(g(h(x))))
 ```
+
    
-The fully connected neural network architecture for the generator and the discriminator used here is: 
+The fully connected neural network architecture for the generator and the discriminator used here is:  
 input (1 neuron) -> hidden layer 1 (12 neurons) -> hidden layer 2 (12 neurons) -> hidden layer 3 (12 neurons) -> input (1 neuron)
 
 Wasserstein loss with gradient penalty is used here.
 
-The input is sampled from a standard Gaussian distribution, i.e., Gaussian -G-> another Gaussian, Gaussian -G-> uniform, Gaussian -G-> discrete distribution.
+The input is sampled from a standard Gaussian distribution, i.e.,   
+Gaussian -G-> another Gaussian,   
+Gaussian -G-> uniform,   
+Gaussian -G-> discrete distribution.
 
 To run or revise the codes, download gan.py and TrainGAN.ipynb, open TrainGAN.ipynb with jupyter notebook, revise the path of the two code files after "%cd" in the first cell, revise the distribution type and other parameters in the last cell, and run all cells.
