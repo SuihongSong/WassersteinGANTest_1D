@@ -46,8 +46,11 @@ Gaussian -G-> uniform,
 Gaussian -G-> discrete distribution.
 
 #### To run or revise the codes,   
-download gan.py and TrainGAN.ipynb,   
-open TrainGAN.ipynb with jupyter notebook,   
-revise the path of gan.py file after "%cd" in the first cell,   
-revise the distribution type and other parameters in the last cell,   
-and run all cells.
+(1) download gan.py and TrainGAN.ipynb,   
+(2) open TrainGAN.ipynb with jupyter notebook,   
+(3) revise the path of gan.py file after "%cd" in the first cell,   
+(4) revise the distribution type and other parameters in the last cell,   
+(5) and run all cells.  
+##### Can run the files with Google Colab:   
+open TrainGAN.ipynb with Colab, upload gan.py file into Colab, and follow step (3) to (5).  
+
