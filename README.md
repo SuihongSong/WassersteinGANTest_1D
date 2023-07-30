@@ -52,5 +52,5 @@ Gaussian -G-> discrete distribution.
 (4) revise the distribution type and other parameters in the last cell,   
 (5) and run all cells.  
 ##### Can run the files with Google Colab:   
-open TrainGAN.ipynb with Colab, upload gan.py file into Colab, and follow step (3) to (5).  
+open TrainGAN.ipynb with Colab, upload gan.py file into Colab, and follow above step (3) to (5).  
 
