@@ -3,11 +3,11 @@
 The codes are mostly based on Jan Kremer's Github repository (https://github.com/kremerj/gan/tree/master). We additionally added Uniform and discrete distributions here.
 
 ![Teaser image](./Gaussian_pdf.gif)   
-**Geneated Gaussian pdf during training, N(mu = 0.5, sigma = 1.5)**
+**Geneated Gaussian pdf during training (with kernel smoothing), N(mu = 0.5, sigma = 1.5)**
 
 
 ![Teaser image](./Uniform_pdf.gif)    
-**Geneated uniform pdf during training, U(-1, 4)**
+**Geneated uniform pdf during training (with kernel smoothing), U(-1, 4)**
 
 
 ![Teaser image](./Discrete_pdf.gif)    
