@@ -3,15 +3,15 @@
 The codes are mostly based on Jan Kremer's Github repository (https://github.com/kremerj/gan/tree/master). We additionally added Uniform and discrete distributions here.
 
 ![Teaser image](./Gaussian_pdf.gif)   
-**Geneated Gaussian pdf during training**
+**Geneated Gaussian pdf during training, N(mu = 0.5, sigma = 1.5)**
 
 
 ![Teaser image](./Uniform_pdf.gif)    
-**Geneated uniform pdf during training**
+**Geneated uniform pdf during training, U(-1, 4)**
 
 
-![Teaser image](./Discrete_pdf_change.gif)    
-**Geneated discrete pdf during training**
+![Teaser image](./Discrete_pdf.gif)    
+**Geneated discrete pdf during training, values = [-3., 1.5, 3.2], prob = [0.3, 0.5, 0.2]**
 
 
 #### The architecture of the generator and the discriminator we use here is simply a fully-connected neural network.  
