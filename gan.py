@@ -4,12 +4,12 @@
 # and by John Glover, http://blog.aylien.com/introduction-generative-adversarial-networks-code-tensorflow/
 # and the Wasserstein-GP implementation at https://github.com/igul222/improved_wgan_training
 
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 import numpy as np
 import tensorflow.compat.v1 as tf
 import time
-
 from tensorflow.compat.v1 import layers
-
 
 class GAN(object):
     """Implementation of the WGAN-GP algorithm.
@@ -76,6 +76,19 @@ class GAN(object):
         output = layers.Dense(1)
         return lambda x: output(k(g(h(x))))
 
+    def _create_WLoss_gp(self, x_real, x_fake, Discriminator):
+      """Create the computational graph of the Wasserstein loss with gradient penalty.
+
+      :param x_real: real (training) data.
+      :param x_fake: fake generated data from the generator.
+      :param Discriminator: discriminator neural network.
+      """
+      epsilon = tf.random_uniform(shape=tf.shape(x_real), minval=0., maxval=1.)
+      interpolation = epsilon * x_real + (1 - epsilon) * x_fake
+      Wloss_gp = (tf.norm(tf.gradients(Discriminator(interpolation), interpolation), axis=1) - 1) ** 2.0   
+      return Wloss_gp   
+
+
     def _create_optimizer(self, loss, var_list, learning_rate, beta1, beta2):
         """Create the optimizer operation.
 
@@ -106,10 +119,8 @@ class GAN(object):
                 self.D_real = D(self.x)  # Criticize real data.
                 self.D_fake = D(self.G)  # Criticize generated data.
 
-                # Create the gradient penalty operations.
-                epsilon = tf.random_uniform(shape=tf.shape(self.x), minval=0., maxval=1.)
-                interpolation = epsilon * self.x + (1 - epsilon) * self.G
-                penalty = (tf.norm(tf.gradients(D(interpolation), interpolation), axis=1) - 1) ** 2.0
+                # Create the Wasserstein loss with gradient penalty.
+                penalty = self._create_WLoss_gp(self.x, self.G, D)
 
             # Create the loss operations of the critic and generator.
             self.loss_d = tf.reduce_mean(self.D_fake - self.D_real + self.lambda_reg * penalty)
