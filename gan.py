@@ -4,12 +4,12 @@
 # and by John Glover, http://blog.aylien.com/introduction-generative-adversarial-networks-code-tensorflow/
 # and the Wasserstein-GP implementation at https://github.com/igul222/improved_wgan_training
 
-import os
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
 import numpy as np
 import tensorflow.compat.v1 as tf
 import time
+
 from tensorflow.compat.v1 import layers
+
 
 class GAN(object):
     """Implementation of the WGAN-GP algorithm.
@@ -19,7 +19,7 @@ class GAN(object):
     """
 
     def __init__(self, n_step=2000, n_critic=5, n_batch=64, n_hidden=12, n_sample=10000, learning_rate=1e-3,
-                 lambda_reg=0.1, log_interval=50, seed=0, beta1=0.5, beta2=0.9, verbose=True, callback=None):
+                 lambda_reg=0.1, log_interval=50, seed=0, beta1=0.5, beta2=0.9, save_path = None, verbose=True, callback=None):
         """Initialize the GAN.
 
         :param n_step: Number of optimization steps.
@@ -51,6 +51,7 @@ class GAN(object):
         self.callback = callback
         self.loss_curve = []
         self.graph = self._create_graph()
+        self.save_path = save_path
 
     def _create_generator(self, activation='softplus'):
         """Create the computational graph of the generator and return it as a functional of its input.
@@ -75,19 +76,6 @@ class GAN(object):
         k = layers.Dense(self.n_hidden, activation=activation)
         output = layers.Dense(1)
         return lambda x: output(k(g(h(x))))
-
-    def _create_WLoss_gp(self, x_real, x_fake, Discriminator):
-      """Create the computational graph of the Wasserstein loss with gradient penalty.
-
-      :param x_real: real (training) data.
-      :param x_fake: fake generated data from the generator.
-      :param Discriminator: discriminator neural network.
-      """
-      epsilon = tf.random_uniform(shape=tf.shape(x_real), minval=0., maxval=1.)
-      interpolation = epsilon * x_real + (1 - epsilon) * x_fake
-      Wloss_gp = (tf.norm(tf.gradients(Discriminator(interpolation), interpolation), axis=1) - 1) ** 2.0   
-      return Wloss_gp   
-
 
     def _create_optimizer(self, loss, var_list, learning_rate, beta1, beta2):
         """Create the optimizer operation.
@@ -119,8 +107,10 @@ class GAN(object):
                 self.D_real = D(self.x)  # Criticize real data.
                 self.D_fake = D(self.G)  # Criticize generated data.
 
-                # Create the Wasserstein loss with gradient penalty.
-                penalty = self._create_WLoss_gp(self.x, self.G, D)
+                # Create the gradient penalty operations.
+                epsilon = tf.random_uniform(shape=tf.shape(self.x), minval=0., maxval=1.)
+                interpolation = epsilon * self.x + (1 - epsilon) * self.G
+                penalty = (tf.norm(tf.gradients(D(interpolation), interpolation), axis=1) - 1) ** 2.0
 
             # Create the loss operations of the critic and generator.
             self.loss_d = tf.reduce_mean(self.D_fake - self.D_real + self.lambda_reg * penalty)
@@ -136,7 +126,7 @@ class GAN(object):
 
             # Create variable initialization operation.
             self.init = tf.global_variables_initializer()
-            graph.finalize()
+
         return graph
 
     def _sample_latent(self, n_sample):
@@ -157,6 +147,7 @@ class GAN(object):
         with tf.Session(graph=self.graph) as session:
             start = time.time()
             session.run(self.init)
+            saver = tf.train.Saver()  # Save both generator and critic
             for step in range(self.n_step + 1):
                 # Optimize the critic for several rounds.
                 for _ in range(self.n_critic):
@@ -175,8 +166,30 @@ class GAN(object):
                         elapsed = int(time.time() - start)
                         print('step: {:4d}, negative critic loss: {:8.4f}, time: {:3d} s'.format(step, -loss_d, elapsed))
                     if self.callback is not None:
-                        self.callback(self, session, X)
+                        self.callback(self, session, X)        
+            saver.save(session, self.save_path)
+            print(f"Model saved at {self.save_path}")
+        
         return self
+
+    def model_sample(self, n_samples=10000):
+        """Sample generated data.
+
+        :param session: The current tensorflow session holding the trained graph.
+        :return: A sample of generated data.
+        """
+        with tf.Session(graph=self.graph) as session:
+            # Load the saved generator variables
+            saver = tf.train.Saver(var_list=self.vars_g)
+            saver.restore(session, self.save_path)
+        
+            # Sample latent variables
+            z = self._sample_latent(n_samples)
+        
+            # Generate samples by running the generator with sampled latent variables
+            generated_samples = np.array(session.run(self.G, {self.z: z}))
+        
+        return generated_samples
 
     def sample(self, session):
         """Sample generated data.
