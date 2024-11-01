@@ -87,7 +87,16 @@ class GAN(object):
         :param beta2: Second moment hyperparameter of ADAM.
         :return: Optimizer operation.
         """
-        return tf.train.AdamOptimizer(learning_rate, beta1=beta1, beta2=beta2).minimize(loss, var_list=var_list)
+        return tf.train.AdamOptimizer(learning_rate, beta1, beta2).minimize(loss, var_list=var_list)
+
+    def WLoss_gp(self, x_real, x_fake, Discriminator, lambda_reg):
+        D_real = Discriminator(x_real)
+        D_fake = Discriminator(x_fake)
+        # Create the gradient penalty operations.
+        t = tf.random_uniform(shape=tf.shape(x_real), minval=0., maxval=1.)
+        x_hat = t * x_real + (1 - t) * x_fake
+        penalty = (tf.norm(tf.gradients(Discriminator(x_hat), x_hat), axis=1) - 1) ** 2.0
+        return tf.reduce_mean(D_fake - D_real + lambda_reg * penalty)
 
     def _create_graph(self):
         """Creates the computational graph.
@@ -99,21 +108,17 @@ class GAN(object):
 
             with tf.variable_scope('generator'):  # Create generator operations.
                 self.z = tf.placeholder(tf.float32, shape=(None, 1))
-                self.G = self._create_generator()(self.z)
+                self.G = self._create_generator()
+                self.x_G = self.G(self.z)
 
             with tf.variable_scope('critic'):  # Create critic operations.
-                self.x = tf.placeholder(tf.float32, shape=(None, 1))
+                self.x_real = tf.placeholder(tf.float32, shape=(None, 1))
                 D = self._create_critic()
-                self.D_real = D(self.x)  # Criticize real data.
-                self.D_fake = D(self.G)  # Criticize generated data.
-
-                # Create the gradient penalty operations.
-                epsilon = tf.random_uniform(shape=tf.shape(self.x), minval=0., maxval=1.)
-                interpolation = epsilon * self.x + (1 - epsilon) * self.G
-                penalty = (tf.norm(tf.gradients(D(interpolation), interpolation), axis=1) - 1) ** 2.0
+                self.D_real = D(self.x_real)  # Criticize real data.
+                self.D_fake = D(self.x_G)  # Criticize generated data.
 
             # Create the loss operations of the critic and generator.
-            self.loss_d = tf.reduce_mean(self.D_fake - self.D_real + self.lambda_reg * penalty)
+            self.loss_d = self.WLoss_gp(self.x_real, self.x_G, D, self.lambda_reg)
             self.loss_g = -tf.reduce_mean(self.D_fake)
 
             # Store the variables of the critic and the generator.
@@ -152,12 +157,12 @@ class GAN(object):
                 # Optimize the critic for several rounds.
                 for _ in range(self.n_critic):
                     x, _ = X.next_batch(self.n_batch)
-                    z = self._sample_latent(self.n_batch)
-                    loss_d, _ = session.run([self.loss_d, self.opt_d], {self.x: x, self.z: z})
+                    z_critic = self._sample_latent(self.n_batch)
+                    loss_d, _ = session.run([self.loss_d, self.opt_d], {self.x_real: x, self.z: z_critic})
 
                 # Sample noise and optimize the generator.
-                z = self._sample_latent(self.n_batch)
-                loss_g, _ = session.run([self.loss_g, self.opt_g], {self.z: z})
+                z_generator = self._sample_latent(self.n_batch)
+                loss_g, _ = session.run([self.loss_g, self.opt_g], {self.z: z_generator})
 
                 # Log the training procedure and call callback method for actions like plotting.
                 if step % self.log_interval == 0:
@@ -184,10 +189,10 @@ class GAN(object):
             saver.restore(session, self.save_path)
         
             # Sample latent variables
-            z = self._sample_latent(n_samples)
+            z_sampling = self._sample_latent(n_samples)
         
             # Generate samples by running the generator with sampled latent variables
-            generated_samples = np.array(session.run(self.G, {self.z: z}))
+            generated_samples = np.array(session.run(self.x_G, {self.z: z_sampling}))
         
         return generated_samples
 
@@ -197,8 +202,8 @@ class GAN(object):
         :param session: The current tensorflow session holding the trained graph.
         :return: A sample of generated data.
         """
-        z = self._sample_latent(self.n_sample)
-        return np.array(session.run(self.G, {self.z: z}))
+        z_sampling = self._sample_latent(self.n_sample)
+        return np.array(session.run(self.x_G, {self.z: z_sampling}))
 
     def critic(self, session, x):
         """Returns the critic function.
@@ -207,4 +212,4 @@ class GAN(object):
         :param x: Input data to criticize.
         :return: The current critic function.
         """
-        return np.array(session.run(self.D_real, {self.x: x}))
+        return np.array(session.run(self.D_real, {self.x_real: x}))
